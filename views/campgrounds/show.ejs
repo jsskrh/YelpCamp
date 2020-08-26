@@ -1,0 +1,83 @@
+<%- include("../partials/header") %> 
+
+<div class="row">
+    <div class="col-md-3">
+        <p class="lead">YelpCamp</p>
+        <div class="list-group">
+            <li class="list-group-item active">Info 1</li>
+            <li class="list-group-item">Info 2</li>
+            <li class="list-group-item">Info 3</li>
+        </div>
+        <div id="map"></div>
+    </div>
+    <div class="col-md-9">
+        <div class="card my-3">
+            <img class="card-img-top" src="<%= campground.image %>" alt="Campground">
+            <div class="card-body">
+                <h4 class="float-right">$<%= campground.price %>/night</h4>
+                <h4 class="card-title"><a href=""><%= campground.name %></a></h4>
+                <p class="card-text"><%= campground.description %></p>
+                <p class="card-text">
+                    <em>Submitted by <%= campground.author.username[0].toUpperCase() + campground.author.username.substring(1) %>, <%= moment(campground.createdAt).fromNow() %></em>
+                </p>
+                <% if (currentUser && campground.author.id.equals(currentUser._id)) { %>
+                    <a class="btn btn-sm btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
+                    <form class="delete-form" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+        <div class="card bg-light mb-3"">
+            <div class="card-body">
+                <div class="text-right">
+                    <a class="btn btn-success" href="/campgrounds/<%= campground._id %>/comments/new">Add New Comment</a>
+                </div>
+                <hr>
+                <% campground.comments.forEach((comment) => { %>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong><%= comment.author.username[0].toUpperCase() + comment.author.username.substring(1) %></strong>
+                            <span class="float-right"><%= moment(comment.createdAt).fromNow() %></span>
+                            <p><%= comment.text %></p>
+                            <% if (currentUser && comment.author.id.equals(currentUser._id)) { %>
+                                <a href="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>/edit" class="btn btn-sm btn-warning">Edit</a>
+                                <form class="delete-form" action="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST">
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %> 
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var campground = <%- JSON.stringify(campground) %>;
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoianNza3JoIiwiYSI6ImNrZTIxdXB6djA1MWQyeG1zZ2xobHRzdzQifQ.T8DKjT8DGOeslxlubRu7-A';
+    
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v10',
+      center: campground.coordinates,
+      zoom: 6
+    });
+    
+    // add markers to map
+    // create a HTML element for our campground location/marker
+    var el = document.createElement('div');
+    el.className = 'marker';
+
+    // make a marker for our campground location and add to the map
+    new mapboxgl.Marker(el)
+    .setLngLat(campground.coordinates)
+    .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+    .setHTML('<h3>' + campground.name + '</h3><p>' + campground.location + '</p>'))
+    .addTo(map);
+
+</script>
+    
+<%- include("../partials/footer") %> 

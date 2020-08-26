@@ -1,0 +1,65 @@
+.delete-form {
+    display: inline;
+}
+
+.navbar {
+    margin-bottom: 1rem;
+}
+
+.auth-form {
+    width: 30%;
+}
+
+.form-group {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: auto;
+}
+.form-group .checkbox {
+    font-weight: 400;
+}
+.form-group .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+}
+.form-group .form-control:focus {
+    z-index: 2;
+}
+.form-group input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.form-group input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* Maps */
+#map {
+    height: 400px;
+    width: 100%;
+}
+
+.marker {
+    background-image: url('/images/mapbox-icon.png');
+    background-size: cover;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.mapboxgl-popup {
+    max-width: 200px;
+}
+
+.mapboxgl-popup-content {
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+}

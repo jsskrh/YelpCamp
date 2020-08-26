@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yelp Camp</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/stylesheets/main.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">YelpCamp</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"   aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="nav navbar-nav nav-pills">
+            <li class="<%= typeof page !== "undefined" && page === "campgrounds" ? "active" : "" %> nav-item"><a href="/campgrounds" class="nav-link">Home</a></li>
+          </ul>
+          <ul class="navbar-nav ml-auto">
+            <% if (!currentUser) { %>
+              <li class="nav-item">
+                <a class="nav-link" href="/login">Login</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/register">Sign Up</a>
+              </li>
+            <% } else { %>
+              <li class="nav-item">
+                <a href="#" class="nav-link">Signed In As <%= currentUser.username[0].toUpperCase() + currentUser.username.substring(1) %></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+            <% }  %>
+          </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+      <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger" role="alert">
+          <%= error %>
+        </div>
+      <% } %>
+      <% if (success && success.length > 0) { %>
+        <div class="alert alert-success" role="alert">
+          <%= success %>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="container">

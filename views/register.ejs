@@ -1,0 +1,19 @@
+<%- include("partials/header") %> 
+
+<div class="row">
+    <div class="col mt-4">
+        <h1 class="text-center h3 mb-3 font-weight-normal">Register</h1>
+        <div class="mx-auto auth-form">
+            <form action="/register" method="POST">
+                <div class="form-group">
+                    <input class="form-control" type="text" placeholder="Username" name="username">
+                    <input class="form-control" type="password" placeholder="Password" name="password">
+                    <button class="btn btn-primary btn-default btn-lg btn-block">Sign up</button>
+                </div>
+            </form>
+            <a href="/campgrounds">Go Back</a>
+        </div>
+    </div>
+</div>
+
+<%- include("partials/footer") %> 
