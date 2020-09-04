@@ -16,6 +16,9 @@ router.get("/register", function(req, res){
 // Handle signup
 router.post("/register", function(req, res){
     var newUser = new User({username: req.body.username});
+    if(req.body.password === process.env.ADMIN_KEY){
+        newUser.isAdmin = true;
+    };
     User.register(newUser, req.body.password, (err, user) => {
         if(err){
             req.flash("error", err.message);
