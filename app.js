@@ -22,6 +22,7 @@ indexRoutes = require("./routes/index");
 // Connect to Database
 var url = process.env.DATABASEURL || "mongodb://localhost:27017/yelp_camp"
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.set('useCreateIndex', true);
 
 mongoose.set('useFindAndModify', false);
 var app = express();
