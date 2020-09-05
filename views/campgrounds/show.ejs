@@ -18,7 +18,7 @@
                 <h4 class="card-title"><a href=""><%= campground.name %></a></h4>
                 <p class="card-text"><%= campground.description %></p>
                 <p class="card-text">
-                    <em>Submitted by <%= campground.author.username[0].toUpperCase() + campground.author.username.substring(1) %>, <%= moment(campground.createdAt).fromNow() %></em>
+                    <em>Submitted by <a href="/users/<%= campground.author.id %>"> <%= campground.author.username[0].toUpperCase() + campground.author.username.substring(1) %> </a>, <%= moment(campground.createdAt).fromNow() %></em>
                 </p>
                 <% if (currentUser && campground.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) { %>
                     <a class="btn btn-sm btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>

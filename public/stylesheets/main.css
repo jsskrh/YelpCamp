@@ -40,6 +40,16 @@
     border-top-right-radius: 0;
 }
 
+.display-campgrounds {
+    display: flex; 
+    flex-wrap: wrap;
+}
+
+#avatar {
+    height: auto;
+    width: 100%;
+}
+
 /* Maps */
 #map {
     height: 400px;
