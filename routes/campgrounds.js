@@ -8,14 +8,30 @@ var moment = require("moment");
 
 // Campgrounds Route
 router.get("/", function(req, res){
-    // Get data from campgrounds database
-    Campground.find({}, (err, campgrounds) => {
-        if(err){
-            console.log(err);
-        } else{
-            res.render("campgrounds/index", {campgrounds: campgrounds, page: "campgrounds"});
-        }
-    });
+    var noMatch = null;
+    if(req.query.search){
+        const regex = new RegExp(escapeRegex(req.query.search), "gi");
+        // Get data from campgrounds database
+        Campground.find({name: regex}, (err, campgrounds) => {
+            if(err){
+                console.log(err);
+            } else{
+                if(campgrounds.length < 1){
+                    noMatch = "No campgrounds match that query, please try again.";
+                }
+                res.render("campgrounds/index", {campgrounds: campgrounds, noMatch: noMatch, page: "campgrounds"});
+            }
+        });
+    } else {
+        // Get data from campgrounds database
+        Campground.find({}, (err, campgrounds) => {
+            if(err){
+                console.log(err);
+            } else{
+                res.render("campgrounds/index", {campgrounds: campgrounds, noMatch: noMatch, page: "campgrounds"});
+            }
+        });
+    }
 });
 
 router.post("/", middleware.isLoggedIn, function(req, res){
@@ -115,5 +131,9 @@ router.delete("/:id", middleware.checkCampgroundOwnership, function(req, res){
         }
     });
 });
+
+function escapeRegex(text){
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
 
 module.exports = router
