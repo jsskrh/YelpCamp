@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 var Campground = require("../models/campground");
+var User = require("../models/user");
+var Notification = require("../models/notification");
 var middleware = require("../middleware");
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
 const geocodingClient = mbxGeocoding({ accessToken: process.env.MAPBOX_TOKEN });
@@ -54,6 +56,7 @@ router.get("/", function(req, res){
     }
 });
 
+// CREATE
 router.post("/", middleware.isLoggedIn, upload.single("image"), function(req, res){
     var name = req.body.name;
     var price = req.body.price;
@@ -67,7 +70,7 @@ router.post("/", middleware.isLoggedIn, upload.single("image"), function(req, re
             query: req.body.location,
             limit: 1
         }).send().then(response => { 
-            cloudinary.uploader.upload(req.file.path, function(result) {
+            cloudinary.uploader.upload(req.file.path, async function(result) {
                 // add cloudinary url for the image to the campground object under image property
                 req.body.image = result.secure_url;
                 // add image's public_id to campground object
@@ -79,16 +82,25 @@ router.post("/", middleware.isLoggedIn, upload.single("image"), function(req, re
                 var location = match[0].place_name;
                 var newCampground = {name: name, image: image, imageId: imageId, price: price, description: description, author: author, location: location, coordinates: coordinates};
                 // Create new campground and save to database
-                Campground.create(newCampground, (err, campground) => {
-                    if(err){
-                        req.flash('error', err.message);
-                        return res.redirect("back");
-                    } else{
-                        req.flash("success", "Successfully created campground")
-                        // Redirect back to campgrounds page
-                        res.redirect("/campgrounds");
+                try {
+                    let campground = await Campground.create(newCampground);
+                    let user = await User.findById(req.user._id).populate('followers').exec();
+                    let newNotification = {
+                        username: req.user.username,
+                        campgroundId: campground.id
                     }
-                });
+                    for(const follower of user.followers) {
+                        let notification = await Notification.create(newNotification);
+                        follower.notifications.push(notification);
+                        follower.save();
+                    }
+                    //redirect back to campgrounds page
+                    req.flash("success", "Successfully added campground");
+                    res.redirect(`/campgrounds/${campground.id}`);
+                } catch(err) {
+                    req.flash('error', err.message);
+                    res.redirect('back');
+                }
             })
         }, error => { 
                 console.log(error);

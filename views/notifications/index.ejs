@@ -1,0 +1,25 @@
+<%- include("../partials/header") %>
+
+<h1>Notifications</h1>
+
+<ul>
+	<% allNotifications.forEach(function(notification) { %>
+        <li>
+            <% if (!notification.campgroundId) { %>
+                <a href="/users/<%= notification.userId %>">
+                    <%= notification.username[0].toUpperCase() + notification.username.substring(1) %> followed you
+                </a>
+            <% } else if (!notification.userId && !notification.commentId) { %>
+                <a href="/campgrounds/<%= notification.campgroundId %>">
+                    <%= notification.username[0].toUpperCase() + notification.username.substring(1) %> created a new campground
+                </a>
+            <% } else { %>
+                <a href="/campgrounds/<%= notification.campgroundId %>">
+                    <%= notification.username[0].toUpperCase() + notification.username.substring(1) %> commented on your post
+                </a>
+            <% } %>
+        </li>
+	<% }); %>
+</ul>
+
+<%- include("../partials/footer") %>

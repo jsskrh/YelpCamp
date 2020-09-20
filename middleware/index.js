@@ -1,5 +1,6 @@
 var Campground = require("../models/campground");
 var Comment = require("../models/comments");
+var User = require("../models/user");
 
 // all the middleware goes here
 var middlewareObj = {};
@@ -56,6 +57,20 @@ middlewareObj.isLoggedIn = function(req, res, next){
     }
     req.flash("error", "You need to be logged in to do that");
     res.redirect("/login");
+}
+
+middlewareObj.checkFollowing = async function(req, res, next){
+    try {
+        let user = await User.findById(req.params.id);
+        isFollowing = false
+        if(user.followers.includes(req.user._id)){
+            isFollowing = true;
+        }
+        return next();
+    } catch (err) {
+        req.flash('error', err.message);
+        res.redirect('back');
+    }
 }
 
 module.exports = middlewareObj;

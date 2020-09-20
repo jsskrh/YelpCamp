@@ -6,11 +6,11 @@ mongoose = require("mongoose"),
 methodOverride = require("method-override"),
 Campground = require("./models/campground"),
 Comment = require("./models/comments"),
+User = require("./models/user"),
 flash = require("connect-flash"),
 passport = require("passport"),
 localStrategy = require("passport-local"),
 passportLocalMongoose = require("passport-local-mongoose"),
-User = require("./models/user"),
 session = require('express-session'),
 MongoStore = require('connect-mongo')(session);
  
@@ -20,7 +20,7 @@ campgroundRoutes = require("./routes/campgrounds"),
 indexRoutes = require("./routes/index");
 
 // Connect to Database
-var url = process.env.DATABASEURL || "mongodb://localhost:27017/yelp_camp"
+var url = process.env.DATABASEURL || "mongodb://localhost:27017/yelp_camp2"
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 mongoose.set('useCreateIndex', true);
 
@@ -48,8 +48,16 @@ passport.use(new localStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.use(function(req, res, next){
+app.use(async function(req, res, next){
     res.locals.currentUser = req.user;
+    if(req.user) {
+        try {
+            let user = await User.findById(req.user._id).populate('notifications', null, { isRead: false }).exec();
+            res.locals.notifications = user.notifications.reverse();
+        } catch(err) {
+            console.log(err.message);
+        }
+    }
     res.locals.error = req.flash("error");
     res.locals.success = req.flash("success");
     next();

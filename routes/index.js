@@ -3,6 +3,8 @@ var router = express.Router();
 var passport = require("passport");
 var User = require("../models/user");
 var Campground = require("../models/campground");
+var Notification = require("../models/notification");
+var middleware = require("../middleware");
 var async = require("async");
 var nodemailer = require("nodemailer");
 var crypto = require("crypto");
@@ -214,20 +216,97 @@ router.post('/reset/:token', function(req, res) {
 });
 
 // User profile
-router.get("/users/:id", function(req, res){
-    User.findById(req.params.id, (err, foundUser) => {
-        if(err){
-            req.flash("error", "Something went wrong");
-            res.redirect("/");
-        }
-        Campground.find().where("author.id").equals(foundUser._id).exec((err, campgrounds) => {
-            if(err){
-                req.flash("error", "Something went wrong");
-                res.redirect("/");
+router.get("/users/:id", [middleware.isLoggedIn, middleware.checkFollowing], async function(req, res){
+    try {
+        let user = await User.findById(req.params.id).populate('followers').populate('following').exec();
+        let campgrounds = await Campground.where("author.id").equals(user._id).exec();
+        res.render('users/profile', { user, campgrounds, isFollowing });
+    } catch(err) {
+        req.flash('error', err.message);
+        return res.redirect('back');
+    }
+});
+
+// Follow user
+router.get('/follow/:id', [middleware.isLoggedIn, middleware.checkFollowing], async function(req, res) {
+    if (isFollowing == false) {
+        try {
+            let user = await User.findById(req.params.id);
+            let loggedUser = await User.findById(req.user._id);
+            user.followers.push(req.user._id);
+            loggedUser.following.push(req.params.id);
+            let newNotification = {
+                username: req.user.username,
+                userId: req.user._id
             }
-            res.render("users/show", {user: foundUser, campgrounds: campgrounds});
-        });
-    });
+            let notification = await Notification.create(newNotification);
+            user.notifications.push(notification);
+            user.save();
+            loggedUser.save();
+            req.flash('success', 'Successfully followed ' + user.username + '!');
+            res.redirect('/users/' + req.params.id);
+        } catch(err) {
+            req.flash('error', err.message);
+            res.redirect('back');
+        }
+    } else {
+        req.flash('error', "Already following " + user.username);
+        res.redirect('back');
+    }
+});
+
+// Unfollow user
+router.get('/unfollow/:id', [middleware.isLoggedIn, middleware.checkFollowing], async function(req, res) {
+    if (isFollowing == true) {
+        try {
+            let user = await User.findById(req.params.id);
+            let loggedUser = await User.findById(req.user._id);
+            user.followers.pull(req.user._id);
+            loggedUser.following.pull(req.params.id);
+            user.save();
+            loggedUser.save();
+            req.flash('success', 'Successfully unfollowed ' + user.username + '!');
+            res.redirect('/users/' + req.params.id);
+        } catch(err) {
+            req.flash('error', err.message);
+            res.redirect('back');
+        }
+    } else {
+        req.flash('error', "Not following" + user.username);
+        res.redirect('back');
+    }
+});
+
+// View all notifications
+router.get('/notifications', middleware.isLoggedIn, async function(req, res) {
+    try {
+        let user = await User.findById(req.user._id).populate({
+            path: 'notifications',
+            options: { sort: { "_id": -1 } }
+        }).exec();
+        let allNotifications = user.notifications;
+        res.render('notifications/index', { allNotifications });
+    } catch(err) {
+        req.flash('error', err.message);
+        res.redirect('back');
+    }
+});
+
+// Handle notification
+router.get('/notifications/:id', middleware.isLoggedIn, async function(req, res) {
+    try {
+        let notification = await Notification.findById(req.params.id);
+        notification.isRead = true;
+        notification.save();
+        if(!notification.campgroundId){
+            res.redirect(`/users/${notification.userId}`);
+        } else {
+            res.redirect(`/campgrounds/${notification.campgroundId}`);
+        }
+    } catch(err) {
+        req.flash('error', err.message);
+        res.redirect('back');
+    }
 });
 
 module.exports = router

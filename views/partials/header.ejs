@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="/stylesheets/main.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
 </head>
@@ -30,8 +31,31 @@
                 <a class="nav-link" href="/register">Sign Up</a>
               </li>
             <% } else { %>
+              <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  Notifications <span class="badge badge-secondary"><%= notifications.length %></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li>
+                      <a href="/notifications" class="dropdown-item">View past notifications</a>
+                  </li>
+                  <% notifications.forEach(function(notification) { %> 
+                    <li>
+                      <a href="/notifications/<%= notification.id %>" class="dropdown-item">
+                        <% if (!notification.campgroundId) { %>
+                          <%= notification.username[0].toUpperCase() + notification.username.substring(1) %> followed you
+                        <% } else if (!notification.userId && !notification.commentId) { %>
+                          <%= notification.username[0].toUpperCase() + notification.username.substring(1) %> created a new campground
+                        <% } else { %>
+                          <%= notification.username[0].toUpperCase() + notification.username.substring(1) %> commented on your post
+                        <% } %>
+                      </a>
+                    </li>
+                  <% }); %>
+                </ul>
+              </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">Signed In As <%= currentUser.username[0].toUpperCase() + currentUser.username.substring(1) %></a>
+                <a href="/users/<%= currentUser.id %>" class="nav-link">Signed In As <%= currentUser.username[0].toUpperCase() + currentUser.username.substring(1) %></a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/logout">Logout</a>
